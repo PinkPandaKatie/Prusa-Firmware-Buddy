@@ -42,6 +42,3 @@ function(check_git_repo_for_dangerous_remotes repo_dir)
 
   endforeach()
 endfunction()
-
-check_git_repo_for_dangerous_remotes("${CMAKE_SOURCE_DIR}")
-check_git_repo_for_dangerous_remotes("${CMAKE_SOURCE_DIR}/lib/Marlin")
