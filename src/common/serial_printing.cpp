@@ -81,9 +81,11 @@ void SerialPrinting::serial_command_hook(const char *command) {
         return;
     }
 
+    /*
     remove_N_prefix(command);
     if (print_indicating_gcode(command)) {
         last_serial_indicator_ms = ticks_ms();
         marlin_server::serial_print_start();
     }
+    */
 }
