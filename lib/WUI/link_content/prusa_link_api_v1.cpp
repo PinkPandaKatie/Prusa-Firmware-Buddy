@@ -37,6 +37,7 @@ using namespace handler;
 using namespace transfers;
 using nhttp::printer::FileCommand;
 using nhttp::printer::FileInfo;
+using nhttp::printer::FrameDump;
 using nhttp::printer::GUIText;
 using nhttp::printer::GcodeUpload;
 using nhttp::printer::JobCommand;
@@ -204,6 +205,18 @@ optional<ConnectionState> PrusaLinkApiV1::accept(const RequestParser &parser) co
 
         return StatusPage(Status::NoContent, parser, "Command submitted");
 
+    } else if (auto gui_suffix_opt = remove_prefix(suffix, "gui?c="); gui_suffix_opt.has_value()) {
+        auto gui_suffix = *gui_suffix_opt;
+        if (gui_suffix == "press") {
+            gui_fake_input(1);
+        } else if (gui_suffix == "left") {
+            gui_fake_input(2);
+        } else if (gui_suffix == "right") {
+            gui_fake_input(3);
+        } else {
+            return StatusPage(Status::NotFound, parser);
+        }
+        return StatusPage(Status::NoContent, parser);
     } else if (suffix == "gui/windows") {
         return GUIText(parser.can_keep_alive(), false, false, true);
     } else if (suffix == "gui/allwindows") {
@@ -212,6 +225,8 @@ optional<ConnectionState> PrusaLinkApiV1::accept(const RequestParser &parser) co
         return GUIText(parser.can_keep_alive(), true, false, true);
     } else if (suffix == "gui/alltext") {
         return GUIText(parser.can_keep_alive(), true, false, false);
+    } else if (suffix == "gui/frame") {
+        return FrameDump(parser.can_keep_alive());
     } else if (suffix == "transfer") {
         if (auto status = Monitor::instance.status(); status.has_value()) {
             return get_only(SendJson(TransferRenderer(status->id, http::APIVersion::v1), parser.can_keep_alive()), parser);

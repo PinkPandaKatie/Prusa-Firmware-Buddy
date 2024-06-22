@@ -19,6 +19,7 @@ target_sources(
             nhttp/file_command.cpp
             nhttp/file_command_marlin.cpp
             nhttp/file_info.cpp
+            nhttp/frame_dump.cpp
             nhttp/gcode_preview.cpp
             nhttp/gcode_upload.cpp
             nhttp/gui_text.cpp
