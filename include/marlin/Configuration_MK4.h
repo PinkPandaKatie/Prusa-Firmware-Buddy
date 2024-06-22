@@ -1636,8 +1636,9 @@
     #define XYZ_NOZZLE_PARK_POINT_M600 \
         {X_NOZZLE_PARK_POINT_M600, Y_NOZZLE_PARK_POINT_M600, Z_NOZZLE_PARK_POINT_M600}
 
-    #define NOZZLE_PARK_XY_FEEDRATE 100 // (mm/s) X and Y axes feedrate (also used for delta Z axis)
-    #define NOZZLE_PARK_Z_FEEDRATE 5 // (mm/s) Z axis feedrate (not used for delta printers)
+
+    #define NOZZLE_PARK_XY_FEEDRATE 500 // (mm/s) X and Y axes feedrate (also used for delta Z axis)
+    #define NOZZLE_PARK_Z_FEEDRATE 50 // (mm/s) Z axis feedrate (not used for delta printers)
 
     #define X_AXIS_LOAD_POS (std::numeric_limits<float>::quiet_NaN())
     #define Y_AXIS_LOAD_POS (std::numeric_limits<float>::quiet_NaN())
