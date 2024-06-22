@@ -225,7 +225,12 @@ optional<ConnectionState> PrusaLinkApiV1::accept(const RequestParser &parser) co
         return GUIText(parser.can_keep_alive(), true, false, true);
     } else if (suffix == "gui/alltext") {
         return GUIText(parser.can_keep_alive(), true, false, false);
-    } else if (suffix == "gui/frame") {
+    } else if (auto frame_suffix_opt = remove_prefix(suffix, "gui/lcd.qoi?"); frame_suffix_opt.has_value()) {
+        auto frame_suffix = *frame_suffix_opt;
+        int flags = 0;
+        std::from_chars(frame_suffix.begin(), frame_suffix.end(), flags);
+        return FrameDump(parser.can_keep_alive(), flags);
+    } else if (suffix == "gui/lcd.qoi") {
         return FrameDump(parser.can_keep_alive());
     } else if (suffix == "transfer") {
         if (auto status = Monitor::instance.status(); status.has_value()) {
