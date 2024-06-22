@@ -194,6 +194,10 @@ const char *window_file_list_t::TopItemSFN() {
     return ldv.ShortFileNameAt(0).first;
 }
 
+string_view_utf8 window_file_list_t::GetText() const {
+    return string_view_utf8::MakeRAM(CurrentLFN());
+}
+
 window_file_list_t::window_file_list_t(window_t *parent, Rect16 rc)
     : AddSuperWindow(parent, rc)
     , focused_item_delegate(string_view_utf8(), nullptr) {

@@ -2,6 +2,7 @@
 #include "basic_gets.h"
 #include "../nhttp/file_info.h"
 #include "../nhttp/file_command.h"
+#include "../nhttp/gui_text.h"
 #include "../nhttp/headers.h"
 #include "../nhttp/gcode_upload.h"
 #include "../nhttp/job_command.h"
@@ -22,6 +23,8 @@
 #include <charconv>
 #include <unistd.h>
 
+#include "gui.hpp"
+
 namespace nhttp::link_content {
 
 using http::Method;
@@ -34,6 +37,7 @@ using namespace handler;
 using namespace transfers;
 using nhttp::printer::FileCommand;
 using nhttp::printer::FileInfo;
+using nhttp::printer::GUIText;
 using nhttp::printer::GcodeUpload;
 using nhttp::printer::JobCommand;
 using printer_state::DeviceState;
@@ -200,6 +204,14 @@ optional<ConnectionState> PrusaLinkApiV1::accept(const RequestParser &parser) co
 
         return StatusPage(Status::NoContent, parser, "Command submitted");
 
+    } else if (suffix == "gui/windows") {
+        return GUIText(parser.can_keep_alive(), false, false, true);
+    } else if (suffix == "gui/allwindows") {
+        return GUIText(parser.can_keep_alive(), false, false, false);
+    } else if (suffix == "gui/text") {
+        return GUIText(parser.can_keep_alive(), true, false, true);
+    } else if (suffix == "gui/alltext") {
+        return GUIText(parser.can_keep_alive(), true, false, false);
     } else if (suffix == "transfer") {
         if (auto status = Monitor::instance.status(); status.has_value()) {
             return get_only(SendJson(TransferRenderer(status->id, http::APIVersion::v1), parser.can_keep_alive()), parser);

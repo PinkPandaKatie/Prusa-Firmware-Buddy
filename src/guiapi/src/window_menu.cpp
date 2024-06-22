@@ -188,6 +188,16 @@ void WindowMenu::printItem(IWindowMenuItem &item, Rect16 rc) {
     item.Print(rc);
 }
 
+string_view_utf8 WindowMenu::GetText() const {
+    auto index = focused_item_index();
+    if (index.has_value()) {
+        auto item = GetItem(*index);
+        if (item != nullptr)
+            return item->GetLabel();
+    }
+    return string_view_utf8();
+}
+
 /**
  * @brief menu behaves similar to frame
  * but redraw of background will not redraw area under items to avoid flickering
