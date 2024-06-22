@@ -58,6 +58,7 @@ enum class ContentType {
     TextGcode,
     ImageIco,
     ImagePng,
+    ImageQoi,
     ImageSvg,
     ApplicationJavascript,
     ApplicationJson,
@@ -83,6 +84,8 @@ constexpr const char *to_str(ContentType content_type) {
         return "image/vnd.microsoft.icon";
     case ContentType::ImagePng:
         return "image/png";
+    case ContentType::ImageQoi:
+        return "image/qoi";
     case ContentType::ImageSvg:
         return "image/svg+xml";
     case ContentType::ApplicationJavascript:

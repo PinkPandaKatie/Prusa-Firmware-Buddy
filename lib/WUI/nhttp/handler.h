@@ -30,6 +30,7 @@
 
 #include "file_info.h"
 #include "file_command.h"
+#include "frame_dump.h"
 #include "gui_text.h"
 #include "gcode_upload.h"
 #include "gcode_preview.h"
@@ -149,6 +150,7 @@ namespace handler {
         SendJson<EmptyRenderer>,
         SendJson<TransferRenderer>,
         SendJson<StatusRenderer>,
+        printer::FrameDump,
         printer::GcodeUpload,
         printer::GCodePreview,
         printer::GUIText,

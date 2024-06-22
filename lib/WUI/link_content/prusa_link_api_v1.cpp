@@ -37,6 +37,7 @@ using namespace handler;
 using namespace transfers;
 using nhttp::printer::FileCommand;
 using nhttp::printer::FileInfo;
+using nhttp::printer::FrameDump;
 using nhttp::printer::GUIText;
 using nhttp::printer::GcodeUpload;
 using nhttp::printer::JobCommand;
@@ -223,6 +224,20 @@ Selector::Accepted PrusaLinkApiV1::accept(const RequestParser &parser, handler::
         out.next = StatusPage(Status::NoContent, parser, "Command submitted");
         return Accepted::Accepted;
 
+    } else if (auto gui_suffix_opt = remove_prefix(suffix, "gui?c="); gui_suffix_opt.has_value()) {
+        auto gui_suffix = *gui_suffix_opt;
+        if (gui_suffix == "press") {
+            gui_fake_input(1);
+        } else if (gui_suffix == "left") {
+            gui_fake_input(2);
+        } else if (gui_suffix == "right") {
+            gui_fake_input(3);
+        } else {
+            out.next = StatusPage(Status::NotFound, parser);
+            return Accepted::Accepted;
+        }
+        out.next = StatusPage(Status::NoContent, parser);
+        return Accepted::Accepted;
     } else if (suffix == "gui/windows") {
         out.next = GUIText(parser.can_keep_alive(), false, false, true);
         return Accepted::Accepted;
@@ -234,6 +249,15 @@ Selector::Accepted PrusaLinkApiV1::accept(const RequestParser &parser, handler::
         return Accepted::Accepted;
     } else if (suffix == "gui/alltext") {
         out.next = GUIText(parser.can_keep_alive(), true, false, false);
+        return Accepted::Accepted;
+    } else if (auto frame_suffix_opt = remove_prefix(suffix, "gui/lcd.qoi?"); frame_suffix_opt.has_value()) {
+        auto frame_suffix = *frame_suffix_opt;
+        int flags = 0;
+        std::from_chars(frame_suffix.begin(), frame_suffix.end(), flags);
+        out.next = FrameDump(parser.can_keep_alive(), flags);
+        return Accepted::Accepted;
+    } else if (suffix == "gui/lcd.qoi") {
+        out.next = FrameDump(parser.can_keep_alive());
         return Accepted::Accepted;
     } else if (suffix == "transfer") {
         if (auto status = Monitor::instance.status(); status.has_value()) {
