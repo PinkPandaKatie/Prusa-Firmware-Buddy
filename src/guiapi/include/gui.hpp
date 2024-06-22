@@ -7,6 +7,8 @@
 #include "display.h"
 #include <guiconfig/GuiDefaults.hpp>
 
+#include <common/freertos_mutex.hpp>
+
 extern void gui_run(void);
 
 extern void gui_init(void);
@@ -31,6 +33,13 @@ extern void gui_loop(void);
 extern void gui_error_run(void);
 
 extern void gui_bare_loop(void);
+
+extern void gui_lock(void);
+extern void gui_unlock(void);
+extern void gui_fake_input(uint8_t type);
+
+extern freertos::Mutex gui_mutex;
+
 
 // meant to be use as MsgCircleBuffer().push_back(txt);
 inline constexpr size_t MSG_STACK_SIZE = 8 + 1; // status message stack size

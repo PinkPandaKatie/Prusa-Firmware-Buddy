@@ -49,6 +49,8 @@ public:
     window_t *GetPrevEnabledSubWin(window_t *win, Rect16 intersection_rect) const;
     window_t *GetFirstEnabledSubWin(Rect16 intersection_rect) const;
 
+    window_t *get_child_dialog([[maybe_unused]] ChildDialogParam param) const override;
+
     bool IsChildFocused();
 
     void SetMenuTimeoutClose();

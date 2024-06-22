@@ -90,6 +90,8 @@ public:
     bool Hide(IWindowMenuItem &item);
     bool SwapVisibility(IWindowMenuItem &item0, IWindowMenuItem &item1);
 
+    virtual string_view_utf8 GetText() const override;
+
 protected:
     virtual void draw() override;
     virtual void windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *param) override;

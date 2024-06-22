@@ -21,6 +21,7 @@ target_sources(
             nhttp/file_info.cpp
             nhttp/gcode_preview.cpp
             nhttp/gcode_upload.cpp
+            nhttp/gui_text.cpp
             nhttp/handler.cpp
             nhttp/headers.cpp
             nhttp/job_command.cpp

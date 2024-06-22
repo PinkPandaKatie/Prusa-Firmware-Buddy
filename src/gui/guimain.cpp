@@ -277,6 +277,9 @@ void gui_error_run(void) {
 }
 
 void gui_run(void) {
+    // Take the lock now. It will only be released during delays
+    gui_lock();
+
     gui_init();
 
     gui::knob::RegisterHeldLeftAction(TakeAScreenshot);
