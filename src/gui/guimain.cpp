@@ -229,6 +229,8 @@ static ScreenFactory::Creator get_error_screen() {
 }
 
 void gui_error_run(void) {
+    gui_lock();
+
     gui_init();
 
     // This is not safe, because resource file could be corrupted
@@ -264,6 +266,9 @@ void gui_error_run(void) {
 }
 
 void gui_run(void) {
+    // Take the lock now. It will only be released during delays
+    gui_lock();
+
     gui_init();
 
     gui::knob::RegisterHeldLeftAction(TakeAScreenshot);

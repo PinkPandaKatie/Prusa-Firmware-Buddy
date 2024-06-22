@@ -126,9 +126,11 @@ window_t *screen_t::get_child_dialog(ChildDialogParam param) const {
         return first_popup;
     case ChildDialogParam::last_popup:
         return last_popup;
+
+    default:
+        return window_frame_t::get_child_dialog(param);
     }
 
-    return nullptr;
 }
 
 window_t *screen_t::GetCapturedWindow() {

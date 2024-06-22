@@ -9,6 +9,7 @@
 #include "color_scheme.hpp"
 #include "gui_time.hpp" // not needed here, but will save lot of includes
 #include "compact_pointer.hpp"
+#include "../../lang/string_view_utf8.hpp"
 // !!! all windows should use gui::GetTick() to access tick value!!!
 
 class window_t {
@@ -152,6 +153,8 @@ public:
         last_dialog,
         first_popup,
         last_popup,
+        first_subwin,
+        last_subwin,
     };
 
     virtual window_t *get_child_dialog([[maybe_unused]] ChildDialogParam param) const {
@@ -163,6 +166,11 @@ public:
 
     inline window_t *GetFirstPopUp() const { return get_child_dialog(ChildDialogParam::first_popup); }
     inline window_t *GetLastPopUp() const { return get_child_dialog(ChildDialogParam::last_popup); }
+
+    inline window_t *GetFirstSubWin() const { return get_child_dialog(ChildDialogParam::first_subwin); }
+    inline window_t *GetLastSubWin() const { return get_child_dialog(ChildDialogParam::last_subwin); }
+
+    virtual string_view_utf8 GetText() const { return string_view_utf8(); }
 
 protected:
     virtual void unconditionalDraw();

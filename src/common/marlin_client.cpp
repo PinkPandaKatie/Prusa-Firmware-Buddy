@@ -27,6 +27,9 @@ using namespace marlin_server;
 using std::nullopt;
 using std::optional;
 
+extern void gui_lock();
+extern void gui_unlock();
+
 namespace marlin_client {
 
 LOG_COMPONENT_DEF(MarlinClient, LOG_SEVERITY_INFO);
@@ -152,7 +155,9 @@ static void _send_request_to_server_and_wait(Request &request) {
             return;
         } else {
             // give marlin server time to process other requests
+            gui_unlock();
             osDelay(10);
+            gui_lock();
             retries_left--;
         }
     } while (retries_left > 0);
@@ -487,9 +492,13 @@ bool is_idle() {
 static bool receive_and_process_client_message(marlin_client_t *client, TickType_t ticks_to_wait) {
     ClientEvent client_event;
     ClientQueue &queue = marlin_client_queue[client->id];
+    gui_unlock();
+
     if (!queue.receive(client_event, ticks_to_wait)) {
+        gui_lock();
         return false;
     }
+    gui_lock();
 
     client->events |= make_mask(client_event.event);
     switch (client_event.event) {

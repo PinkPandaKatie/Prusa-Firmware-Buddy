@@ -52,6 +52,9 @@ public:
     /// \returns a child window whose touch rect contains the point (or nullptr)
     window_t *get_child_by_touch_point(point_ui16_t point);
 
+    window_t *get_child_dialog([[maybe_unused]] ChildDialogParam param) const override;
+
+
     bool IsChildFocused();
 
     void SetMenuTimeoutClose();

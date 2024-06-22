@@ -93,6 +93,19 @@ void WindowMenu::windowEvent([[maybe_unused]] window_t *sender, GUI_event_t even
 
     IWindowMenu::windowEvent(sender, event, param);
 }
+string_view_utf8 WindowMenu::GetText() const {
+    if (!pContainer)
+        return string_view_utf8();
+
+    auto index = focused_item_index();
+    if (index.has_value()) {
+        auto item = pContainer->GetItemByVisibleIndex(*index);
+        if (item != nullptr)
+            return item->GetLabel();
+    }
+    return string_view_utf8();
+}
+
 
 WindowMenu::Node WindowMenu::findFirst() {
     IWindowMenuItem *item = item_at(scroll_offset());
