@@ -10,6 +10,7 @@
 #include "../wui_api.h"
 #include "prusa_api_helpers.hpp"
 
+#include <http/url_decode.h>
 #include <marlin_client.hpp>
 #include <common/path_utils.h>
 #include <transfers/monitor.hpp>
@@ -25,6 +26,7 @@ namespace nhttp::link_content {
 
 using http::Method;
 using http::Status;
+using http::url_decode;
 using std::nullopt;
 using std::optional;
 using std::string_view;
@@ -152,6 +154,52 @@ optional<ConnectionState> PrusaLinkApiV1::accept(const RequestParser &parser) co
             id = nullopt;
         }
         return get_only(SendJson(StatusRenderer(id), parser.can_keep_alive()), parser);
+    } else if (auto gcode_suffix_opt = remove_prefix(suffix, "gcode?"); gcode_suffix_opt.has_value()) {
+        auto gcode_suffix = *gcode_suffix_opt;
+
+        // The proper way to do this would be a POST, but we would have to implement
+        // a full class, and I don't feel like doing that.
+
+        if (marlin_client::is_printing()) {
+            return StatusPage(Status::Conflict, parser, "Print in progress");
+        }
+
+        char decoded_gcode[128];
+        const char* buf = gcode_suffix.begin();
+        const char* end = gcode_suffix.end();
+
+        while (true) {
+            const char* amp = static_cast<const char *>(memchr(buf, '&', end - buf));
+            if (amp == nullptr) {
+                amp = end;
+            }
+
+            string_view raw_gcode(buf, amp - buf);
+
+            if (!url_decode(raw_gcode, decoded_gcode, sizeof(decoded_gcode))) {
+                return StatusPage(Status::BadRequest, parser, "url_decode() failed");
+            }
+
+            auto res = marlin_client::gcode_try(decoded_gcode);
+            switch(res) {
+                case marlin_client::GcodeTryResult::Submitted:
+                    break;
+                case marlin_client::GcodeTryResult::QueueFull:
+                    return StatusPage(Status::TooManyRequests, parser, "Queue full");
+                case marlin_client::GcodeTryResult::GcodeTooLong:
+                    return StatusPage(Status::UriTooLong, parser, "GCode too long");
+                default:
+                    return StatusPage(Status::InternalServerError, parser);
+            }
+
+            if (amp >= end)
+                break;
+
+            buf = amp + 1;
+        }
+
+        return StatusPage(Status::NoContent, parser, "Command submitted");
+
     } else if (suffix == "transfer") {
         if (auto status = Monitor::instance.status(); status.has_value()) {
             return get_only(SendJson(TransferRenderer(status->id, http::APIVersion::v1), parser.can_keep_alive()), parser);
