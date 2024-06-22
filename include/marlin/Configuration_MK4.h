@@ -1607,8 +1607,8 @@
         { (X_MAX_POS - 10), 170, 20 }
     #define NOZZLE_PARK_POINT_M600 \
         { (X_MAX_POS - 10), (Y_MIN_POS + 1), 20 }
-    #define NOZZLE_PARK_XY_FEEDRATE 100 // (mm/s) X and Y axes feedrate (also used for delta Z axis)
-    #define NOZZLE_PARK_Z_FEEDRATE 5 // (mm/s) Z axis feedrate (not used for delta printers)
+    #define NOZZLE_PARK_XY_FEEDRATE 500 // (mm/s) X and Y axes feedrate (also used for delta Z axis)
+    #define NOZZLE_PARK_Z_FEEDRATE 50 // (mm/s) Z axis feedrate (not used for delta printers)
 
     /**
      * Park the nozzle after print is finished
