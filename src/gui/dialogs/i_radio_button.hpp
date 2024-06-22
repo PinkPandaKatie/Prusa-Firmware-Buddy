@@ -72,6 +72,8 @@ public:
 
     Rect16 get_rect_for_touch() const override;
 
+    string_view_utf8 GetText() const override;
+
 protected:
     virtual void windowEvent(window_t *sender, GUI_event_t event, void *param) override;
     virtual void screenEvent(window_t *sender, GUI_event_t event, void *const param) override;
@@ -82,7 +84,7 @@ protected:
 
     void invalidateWhatIsNeeded();
     void validateBtnIndex(); // needed for iconned layout
-    bool isIndexValid(size_t index);
+    bool isIndexValid(size_t index) const;
     size_t maxSize() const; // depends id it is iconned
 
     // TODO: REMOVEME BFW-6028

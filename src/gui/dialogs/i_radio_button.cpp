@@ -220,6 +220,16 @@ void IRadioButton::draw_n_btns(size_t btn_count) {
     }
 }
 
+string_view_utf8 IRadioButton::GetText() const {
+    const size_t index = GetBtnIndex();
+    if (isIndexValid(index)) {
+        Layout layout = getNormalBtnRects(GetBtnCount());
+        return _(layout.txts_to_print[index]);
+    }
+    return string_view_utf8();
+}
+
+
 IRadioButton::Layout IRadioButton::getNormalBtnRects(size_t btn_count) const {
     Layout ret;
     if (getAlternativeTexts()) {
@@ -303,7 +313,7 @@ void IRadioButton::validateBtnIndex() {
     }
 }
 
-bool IRadioButton::isIndexValid(size_t index) {
+bool IRadioButton::isIndexValid(size_t index) const {
     if (fixed_width_buttons_count > 0) {
         return (responseFromIndex(index) != Response::_none);
     }

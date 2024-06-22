@@ -37,6 +37,8 @@
 LOG_COMPONENT_REF(GUI);
 LOG_COMPONENT_REF(Touch);
 
+freertos::Mutex gui_mutex;
+
 static bool gui_invalid = false;
 
 constexpr padding_ui8_t GuiDefaults::Padding;
@@ -70,6 +72,12 @@ void gui_init(void) {
 #endif
 }
 
+static uint8_t gui_simulate_event = 0;
+
+void gui_fake_input(uint8_t type) {
+    gui_simulate_event = type;
+}
+
 void gui_handle_jogwheel() {
     BtnState_t btn_ev;
     bool is_btn = jogwheel.ConsumeButtonEvent(btn_ev);
@@ -82,6 +90,22 @@ void gui_handle_jogwheel() {
             gui::knob::EventClick(btn_ev);
         }
     }
+
+    switch (gui_simulate_event) {
+        case 0: break;
+        case 1:
+            gui::knob::EventClick(BtnState_t::Pressed);
+            gui::knob::EventClick(BtnState_t::Released);
+            break;
+        case 2:
+            gui::knob::EventEncoder(-1);
+            break;
+        case 3:
+            gui::knob::EventEncoder(1);
+            break;
+    }
+
+    gui_simulate_event = 0;
 }
 
 #if HAS_TOUCH()
@@ -124,6 +148,30 @@ void gui_handle_touch() {
 }
 #endif
 
+extern osThreadId displayTaskHandle;
+
+void gui_lock() {
+    if (osThreadGetId() == displayTaskHandle)
+      gui_mutex.lock();
+}
+
+void gui_unlock() {
+    if (osThreadGetId() == displayTaskHandle)
+      gui_mutex.unlock();
+
+}
+
+void gui_sleep(uint32_t ms) {
+    if (osThreadGetId() == displayTaskHandle) {
+        gui_mutex.unlock();
+        osDelay(ms);
+        gui_mutex.lock();
+    } else {
+        osDelay(ms);
+    }
+
+}
+
 void gui_redraw(void) {
     const uint32_t now = ticks_ms();
 
@@ -144,10 +192,12 @@ void gui_redraw(void) {
         }
     }
 
+    gui_unlock();
     if (should_sleep) {
         uint32_t sleep = std::clamp(gui_redraw_timer.Remains(now), GUI_DELAY_MIN, GUI_DELAY_MAX);
         osDelay(sleep);
     }
+    gui_lock();
 }
 
 // at least one window is invalid

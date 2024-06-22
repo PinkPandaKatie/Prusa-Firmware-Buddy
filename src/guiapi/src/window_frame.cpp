@@ -171,6 +171,18 @@ window_t *window_frame_t::getLastNormal() const {
     return last_normal;
 }
 
+window_t *window_frame_t::get_child_dialog(ChildDialogParam param) const {
+    switch (param) {
+    case ChildDialogParam::first_subwin:
+        return first_normal;
+    case ChildDialogParam::last_subwin:
+        return last_normal;
+    default:
+        return nullptr;
+    }
+
+}
+
 void window_frame_t::draw() {
     if (!IsVisible()) {
         return;

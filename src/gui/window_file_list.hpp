@@ -73,6 +73,8 @@ public:
     /// @return true if path is either empty or contains just a "/"
     static bool IsPathRoot(const char *path);
 
+    virtual string_view_utf8 GetText() const override;
+
 protected:
     void setup_item(ItemVariant &variant, int index) final;
 
