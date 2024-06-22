@@ -208,11 +208,23 @@ optional<ConnectionState> PrusaLinkApiV1::accept(const RequestParser &parser) co
     } else if (auto gui_suffix_opt = remove_prefix(suffix, "gui?c="); gui_suffix_opt.has_value()) {
         auto gui_suffix = *gui_suffix_opt;
         if (gui_suffix == "press") {
-            gui_fake_input(1);
+            gui_fake_input(GuiFakeEvent::KnobClick);
         } else if (gui_suffix == "left") {
-            gui_fake_input(2);
+            gui_fake_input(GuiFakeEvent::KnobLeft);
         } else if (gui_suffix == "right") {
-            gui_fake_input(3);
+            gui_fake_input(GuiFakeEvent::KnobRight);
+        } else if (gui_suffix_opt = remove_prefix(gui_suffix, "tap&p="); gui_suffix_opt.has_value()) {
+            point_ui16_t pos;
+            gui_suffix = *gui_suffix_opt;
+            const char* comma = static_cast<const char *>(memchr(gui_suffix.begin(), ',', gui_suffix.size()));
+            if (comma != nullptr) {
+                std::from_chars(gui_suffix.begin(), comma, pos.x);
+                std::from_chars(comma + 1, gui_suffix.end(), pos.y);
+                gui_fake_tap(pos);
+            } else {
+                return StatusPage(Status::BadRequest, parser, "Invalid position");
+            }
+
         } else {
             return StatusPage(Status::NotFound, parser);
         }

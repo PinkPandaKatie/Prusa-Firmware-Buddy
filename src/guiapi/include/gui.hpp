@@ -35,7 +35,17 @@ extern void gui_bare_loop(void);
 
 extern void gui_lock(void);
 extern void gui_unlock(void);
-extern void gui_fake_input(uint8_t type);
+
+enum GuiFakeEvent {
+    None = 0,
+    KnobClick,
+    KnobLeft,
+    KnobRight,
+    ScreenTap
+};
+
+extern void gui_fake_input(GuiFakeEvent type);
+extern void gui_fake_tap(point_ui16_t pos);
 
 extern freertos::Mutex gui_mutex;
 
