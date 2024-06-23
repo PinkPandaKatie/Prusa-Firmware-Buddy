@@ -36,12 +36,11 @@ extern void gui_unlock(void);
 enum GuiFakeEvent {
     None = 0,
     KnobClick,
-    KnobLeft,
-    KnobRight,
     ScreenTap
 };
 
 extern void gui_fake_input(GuiFakeEvent type);
 extern void gui_fake_tap(point_ui16_t pos);
+extern void gui_fake_encoder(int32_t diff);
 
 extern freertos::Mutex gui_mutex;
