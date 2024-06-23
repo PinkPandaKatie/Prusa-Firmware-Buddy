@@ -210,9 +210,9 @@ optional<ConnectionState> PrusaLinkApiV1::accept(const RequestParser &parser) co
         if (gui_suffix == "press") {
             gui_fake_input(GuiFakeEvent::KnobClick);
         } else if (gui_suffix == "left") {
-            gui_fake_input(GuiFakeEvent::KnobLeft);
+            gui_fake_encoder(-1);
         } else if (gui_suffix == "right") {
-            gui_fake_input(GuiFakeEvent::KnobRight);
+            gui_fake_encoder(1);
         } else if (gui_suffix_opt = remove_prefix(gui_suffix, "tap&p="); gui_suffix_opt.has_value()) {
             point_ui16_t pos;
             gui_suffix = *gui_suffix_opt;
@@ -225,6 +225,11 @@ optional<ConnectionState> PrusaLinkApiV1::accept(const RequestParser &parser) co
                 return StatusPage(Status::BadRequest, parser, "Invalid position");
             }
 
+        } else if (gui_suffix_opt = remove_prefix(gui_suffix, "knob&v="); gui_suffix_opt.has_value()) {
+            int32_t amt;
+            gui_suffix = *gui_suffix_opt;
+            std::from_chars(gui_suffix.begin(), gui_suffix.end(), amt);
+            gui_fake_encoder(amt);
         } else {
             return StatusPage(Status::NotFound, parser);
         }
