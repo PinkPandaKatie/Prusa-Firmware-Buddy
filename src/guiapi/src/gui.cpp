@@ -66,10 +66,15 @@ void gui_init(void) {
 }
 
 static GuiFakeEvent gui_simulate_event = GuiFakeEvent::None;
+static int32_t gui_simulate_encoder = 0;
 static point_ui16_t gui_simulate_tap_pos(0, 0);
 
 void gui_fake_input(GuiFakeEvent type) {
     gui_simulate_event = type;
+}
+
+void gui_fake_encoder(int32_t diff) {
+    gui_simulate_encoder += diff;
 }
 
 void gui_fake_tap(point_ui16_t pos) {
@@ -90,17 +95,17 @@ void gui_handle_jogwheel() {
         }
     }
 
+    encoder_diff = gui_simulate_encoder;
+    if (encoder_diff != 0) {
+        gui_simulate_encoder = 0;
+        gui::knob::EventEncoder(encoder_diff);
+    }
+
     switch (gui_simulate_event) {
         case GuiFakeEvent::None: break;
         case GuiFakeEvent::KnobClick:
             gui::knob::EventClick(BtnState_t::Pressed);
             gui::knob::EventClick(BtnState_t::Released);
-            break;
-        case GuiFakeEvent::KnobLeft:
-            gui::knob::EventEncoder(-1);
-            break;
-        case GuiFakeEvent::KnobRight:
-            gui::knob::EventEncoder(1);
             break;
         case GuiFakeEvent::ScreenTap: {
             event_conversion_union event_data {
