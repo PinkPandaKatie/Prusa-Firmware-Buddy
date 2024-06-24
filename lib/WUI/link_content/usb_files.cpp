@@ -17,10 +17,18 @@ using namespace handler;
 Selector::Accepted UsbFiles::accept(const RequestParser &parser, handler::Step &out) const {
     const string_view uri = parser.uri();
     const constexpr string_view prefix = "/usb/";
+    const constexpr string_view prefix2 = "/usb/www/";
+
+    bool as_attachment = true;
 
     // We claim the /usb/ namespace.
     if (uri.size() < prefix.size() || uri.substr(0, prefix.size()) != prefix) {
         return Accepted::NextSelector;
+    }
+
+    // Don't send anything under www/ as an attachment
+    if (uri.size() >= prefix2.size() && uri.substr(0, prefix2.size()) == prefix2) {
+        as_attachment = false;
     }
 
     // Content of the USB drive is only for authenticated, don't ever try anything without it.
@@ -43,11 +51,14 @@ Selector::Accepted UsbFiles::accept(const RequestParser &parser, handler::Step &
              * protected by the API key and it's the user's files, so
              * that's probably fine.
              */
-            static const char *const hdrs[] = {
+            static const char *const hdrs_attachment[] = {
                 "Content-Disposition: attachment\r\n",
                 nullptr,
             };
-            out.next = SendFile(f, fname, guess_content_by_ext(fname), parser.can_keep_alive(), parser.accepts_json, parser.if_none_match, hdrs);
+
+            static const char *const hdrs_no_attachment[] = { nullptr };
+
+            out.next = SendFile(f, fname, guess_content_by_ext(fname), parser.can_keep_alive(), parser.accepts_json, parser.if_none_match, as_attachment ? hdrs_attachment : hdrs_no_attachment);
             /*
              * Some browsers reportedly mishandle combination of attachment +
              * etags/caching. We give up caching in this particular case, as it
