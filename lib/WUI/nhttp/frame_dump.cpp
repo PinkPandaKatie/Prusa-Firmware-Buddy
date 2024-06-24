@@ -82,7 +82,19 @@ FrameDump::FrameDump(bool can_keep_alive, int debug_flags)
     px_prev.rgba.g = 0;
     px_prev.rgba.b = 0;
     px_prev.rgba.a = 255;
+
     memset(qoi_index, 0, sizeof(qoi_index));
+
+    // The index should be initialized in a way that we never emit a QOI_OP_INDEX
+    // for a pixel that has not appeared in the image. This can be accomplished by
+    // making sure that every position in the index has a color that does not match
+    // the hash.
+
+    // Since we only support RGB to save memory, zeroing out the index effectively
+    // sets every pixel to (0, 0, 0, 255). This means that the only index that matches is
+    // qoi_color_hash(0, 0, 0, 255) == 53. We just have to set that to some other value.
+
+    qoi_index[qoi_color_hash(px_prev) * 3] = 255;
 }
 
 namespace {
