@@ -68,6 +68,7 @@ void gui_init(void) {
 static GuiFakeEvent gui_simulate_event = GuiFakeEvent::None;
 static int32_t gui_simulate_encoder = 0;
 static point_ui16_t gui_simulate_tap_pos(0, 0);
+static bool gui_fake_knob_pressed = false;
 
 void gui_fake_input(GuiFakeEvent type) {
     gui_simulate_event = type;
@@ -96,36 +97,50 @@ void gui_handle_jogwheel() {
     }
 
     encoder_diff = gui_simulate_encoder;
+
     if (encoder_diff != 0) {
         gui_simulate_encoder = 0;
         gui::knob::EventEncoder(encoder_diff);
     }
 
-    switch (gui_simulate_event) {
-        case GuiFakeEvent::None: break;
-        case GuiFakeEvent::KnobClick:
-            gui::knob::EventClick(BtnState_t::Pressed);
-            gui::knob::EventClick(BtnState_t::Released);
-            break;
-        case GuiFakeEvent::ScreenTap: {
-            event_conversion_union event_data {
-                .point = {
-                    .x = gui_simulate_tap_pos.x,
-                    .y = gui_simulate_tap_pos.y,
-                }
-            };
-
-            Screens::Access()->ResetTimeout();
-            marlin_client::notify_server_about_knob_click();
-
-            if (window_t *captured_window = Screens::Access()->Get()->GetCapturedWindow(); captured_window && captured_window->get_rect_for_touch().Contain(event_data.point)) {
-                captured_window->WindowEvent(captured_window, GUI_event_t::TOUCH_CLICK, event_data.pvoid);
-            }
-        } break;
-
+    if (gui_fake_knob_pressed) {
+        gui_fake_knob_pressed = false;
+        gui::knob::EventClick(BtnState_t::Released);
     }
 
-    gui_simulate_event = GuiFakeEvent::None;
+    GuiFakeEvent simulate_event = gui_simulate_event;
+    if (simulate_event != GuiFakeEvent::None) {
+        gui_simulate_event = GuiFakeEvent::None;
+
+        switch (simulate_event) {
+            case GuiFakeEvent::KnobClick:
+                // Set a flag to send a release event on the next loop. This also takes
+                // care of the case where the event triggers a recursive call into the
+                // GUI loop.
+                gui_fake_knob_pressed = true;
+                gui::knob::EventClick(BtnState_t::Pressed);
+                break;
+
+            case GuiFakeEvent::ScreenTap: {
+                event_conversion_union event_data {
+                    .point = {
+                        .x = gui_simulate_tap_pos.x,
+                        .y = gui_simulate_tap_pos.y,
+                    }
+                };
+
+                Screens::Access()->ResetTimeout();
+                marlin_client::notify_server_about_knob_click();
+
+                if (window_t *captured_window = Screens::Access()->Get()->GetCapturedWindow(); captured_window && captured_window->get_rect_for_touch().Contain(event_data.point)) {
+                    captured_window->WindowEvent(captured_window, GUI_event_t::TOUCH_CLICK, event_data.pvoid);
+                }
+            } break;
+
+            default: break;
+        }
+    }
+
 }
 
 #if HAS_TOUCH()
