@@ -1960,7 +1960,7 @@ static void _server_print_loop(void) {
         }
 #endif
 
-#if HAS_LOADCELL()
+#if 0 && HAS_LOADCELL()
         // Reset Live-Adjust-Z value before every print
         probe_offset.z = 0;
         marlin_vars().z_offset = 0;
