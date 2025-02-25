@@ -511,20 +511,23 @@ void screen_printing_data_t::updateTimes() {
         return;
     }
 
+    bool value_available = true;
+    auto time_to_end = marlin_vars().time_to_end.get();
+    auto time_to_change = marlin_vars().time_to_pause.get();
+
     if (auto now = ticks_s(); now - last_update_time_s > rotation_time_s) {
         // do rotation
 
         currently_showing = static_cast<CurrentlyShowing>(
             (ftrstd::to_underlying(currently_showing) + 1) % ftrstd::to_underlying(CurrentlyShowing::_count));
 
+        if (currently_showing == CurrentlyShowing::time_to_change && time_to_change == marlin_server::TIME_TO_END_INVALID)
+            currently_showing = CurrentlyShowing::time_since_start;
+
         rotating_circles.set_index(ftrstd::to_underlying(currently_showing));
 
         last_update_time_s = now;
     }
-
-    bool value_available = true;
-    auto time_to_end = marlin_vars().time_to_end.get();
-    auto time_to_change = marlin_vars().time_to_pause.get();
 
     if ((currently_showing == CurrentlyShowing::end_time
             || currently_showing == CurrentlyShowing::remaining_time)
